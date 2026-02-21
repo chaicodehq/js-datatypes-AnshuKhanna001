@@ -42,4 +42,89 @@
  */
 export function generateReportCard(student) {
   // Your code here
+  if (typeof student !== "object" || !student) {
+    return null;
+  }
+
+  const { name, marks } = student;
+  if (
+    typeof name !== "string" ||
+    typeof marks !== "object" ||
+    Object.keys(marks).length === 0 ||
+    Object.keys(name).length === 0
+  ) {
+    return null;
+  }
+
+  const allValidMarks = Object.values(marks).every((mark) => {
+    return typeof mark === "number" && mark >= 0 && mark <= 100;
+  });
+
+  if (!allValidMarks) {
+    return null;
+  }
+
+  const keys = Object.keys(marks);
+  const values = Object.values(marks);
+  const totalMarks = values.reduce((acc, mark) => mark + acc, 0);
+
+  const subjectCount = keys.length;
+
+  const percentage = parseFloat(
+    ((totalMarks / (subjectCount * 100)) * 100).toFixed(2),
+  );
+
+  let grade;
+
+  if (percentage >= 90) {
+    grade = "A+";
+  } else if (percentage >= 80) {
+    grade = "A";
+  } else if (percentage >= 70) {
+    grade = "B";
+  } else if (percentage >= 60) {
+    grade = "C";
+  } else if (percentage >= 40) {
+    grade = "D";
+  } else {
+    grade = "F";
+  }
+
+  const highestSubject = Object.entries(marks).reduce(
+    (highest, mark) => {
+      if (mark[1] > highest[1]) {
+        return mark
+      }
+      return highest
+    },
+    ["", 0],
+  );
+
+  const lowestSubject = Object.entries(marks).reduce(
+    (highest, mark) => {
+      if (mark[1] < highest[1]) {
+        highest = mark;
+      }
+      return highest
+    },
+    ["", 100],
+  );
+
+  const filterpassedSubjects = Object.entries(marks).filter((mark) => {
+    if (mark[1] >= 40) {
+      return true;
+    }
+  });
+
+  const passedSubjects = filterpassedSubjects.map((Subjects) => Subjects[0]);
+
+  const filterfailedSubjects = Object.entries(marks).filter((mark) => {
+    if (mark[1] < 40) {
+      return true;
+    }
+  });
+
+  const failedSubjects = filterfailedSubjects.map((Subjects) => Subjects[0]);
+
+  return {name,totalMarks,percentage,grade,highestSubject: highestSubject[0],lowestSubject: lowestSubject[0],passedSubjects,failedSubjects,subjectCount}
 }

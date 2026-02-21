@@ -48,4 +48,87 @@
  */
 export function analyzeUPITransactions(transactions) {
   // Your code here
+  if (!Array.isArray(transactions)) {
+    return null;
+  }
+
+  const filterTransactions = transactions.filter(
+    (transaction) =>
+      transaction.amount > 0 &&
+      (transaction.type === "credit" ||
+      transaction.type === "debit")
+  );
+
+  if (filterTransactions.length === 0) {
+    return null;
+  }
+
+  const totalCreditandDebit = filterTransactions.reduce(
+    (acc, filterTransaction) => {
+      if (filterTransaction.type === "credit") {
+        acc.totalCredit += filterTransaction.amount;
+      } else if (filterTransaction.type === "debit") {
+        acc.totalDebit += filterTransaction.amount;
+      }
+      return acc;
+    },
+    { totalCredit: 0, totalDebit: 0 },
+  );
+
+  const { totalCredit, totalDebit } = totalCreditandDebit;
+
+  const netBalance = totalCredit - totalDebit;
+  const transactionCount = filterTransactions.length;
+  const avgTransaction = Math.round(
+    (totalCredit + totalDebit) / transactionCount,
+  );
+
+  const highestTransaction = filterTransactions.reduce((max, curr) => {
+    return curr.amount > max.amount ? curr : max;
+  });
+
+  const categoryBreakdown = filterTransactions.reduce((acc, transaction) => {
+    const key = transaction.category;
+    acc[key] = (acc[key] || 0) + transaction.amount;
+    return acc;
+  }, {});
+
+  const contactCount  = filterTransactions.reduce(
+    (acc, filterTransaction) => {
+      acc[filterTransaction.to] = (acc[filterTransaction.to] || 0) + 1;
+      return acc;
+    },
+    {},
+  );
+
+  let frequentContact  = null;
+  let maxValue = 0;
+
+    for (const [key, value] of Object.entries(contactCount)) {
+    if (value > maxValue) {
+      maxValue = value;
+      frequentContact = key;
+    }
+  }
+
+
+  const allAbove100 = filterTransactions.every(
+    (filterTransaction) => filterTransaction.amount > 100,
+  );
+  const hasLargeTransaction = filterTransactions.some(
+    (filterTransaction) => filterTransaction.amount >= 5000,
+  );
+
+  return {
+    totalCredit,
+    totalDebit,
+    netBalance,
+    transactionCount,
+    avgTransaction,
+    highestTransaction,
+    categoryBreakdown,
+    frequentContact,
+    allAbove100,
+    hasLargeTransaction,
+  };
 }
